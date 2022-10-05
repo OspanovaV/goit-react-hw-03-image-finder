@@ -31,79 +31,41 @@ export class App extends Component {
       this.fetchImages();
     }
   }
-  // async fetchImages() {
-  //   const { query, page } = this.state;
-  //   this.setState({ isLoading: true });
-  //   try {
-  //     const api = await fetchData(query, page);
-  //     const totalPages = Math.ceil(totalHits / PER_PAGE);
-  //     if (hits.length === 0) {
-  //       return toast.error('Sorry, no images found. Please, try again!');
-  //     }
-  //     if (page === 1) {
-  //       toast.success(`Hooray! We found ${totalHits} images.`);
-  //     }
-  //     if (page === totalPages) {
-  //       toast.info("You've reached the end of search results.");
-  //     }
-  //     const data = hits.map(({ id, webformatURL, largeImageURL, tags }) => {
-  //       return {
-  //         id,
-  //         webformatURL,
-  //         largeImageURL,
-  //         tags,
-  //       };
-  //     });
-  //       this.setState(({ images }) => ({
-  //       images: [...images, ...data],
-  //       total: totalHits,
-  //     }));
-  //   } catch (error) {
-  //     this.setState({ error })
-  //   }
-  //   finally {
-  //     this.setState({ isLoading: false })
-  //   };
-  
-    fetchImages = () => {
-      const { query, page } = this.state;
-  
-      this.setState({ isLoading: true });
-
-      fetchData(query, page)
-        .then(({ hits, totalHits }) => {
-          const totalPages = Math.ceil(totalHits /PER_PAGE);
-
-          if (hits.length === 0) {
-            return toast.error('Sorry, no images found. Please, try again!');
-          }
-
-          if (page === 1) {
-            toast.success(`Hooray! We found ${totalHits} images.`);
-          }
-
-          if (page === totalPages) {
-            toast.info("You've reached the end of search results.");
-          }
-
-          const data = hits.map(({ id, webformatURL, largeImageURL, tags }) => {
-            return {
-              id,
-              webformatURL,
-              largeImageURL,
-              tags,
-            };
-          });
-          //к старым значениям дописали новые
-          this.setState(({ images }) => ({
-            images: [...images, ...data],
-            total: totalHits,
-          }));
-        })
-        .catch(error => this.setState({ error }))
-        .finally(() => this.setState({ isLoading: false }));
+  async fetchImages() {
+    const { query, page } = this.state;
+    this.setState({ isLoading: true });
+    try {
+      const { totalHits, hits } = await fetchData(query, page);
+      const totalPages = Math.ceil(totalHits / PER_PAGE);
+      if (hits.length === 0) {
+        return toast.error('Sorry, no images found. Please, try again!');
+      }
+      if (page === 1) {
+        toast.success(`Hooray! We found ${totalHits} images.`);
+      }
+      if (page === totalPages) {
+        toast.info("You've reached the end of search results.");
+      }
+      const data = hits.map(({ id, webformatURL, largeImageURL, tags }) => {
+        return {
+          id,
+          webformatURL,
+          largeImageURL,
+          tags,
+        };
+      });
+      this.setState(({ images }) => ({
+        images: [...images, ...data],
+        total: totalHits,
+      }));
+    } catch (error) {
+      this.setState({ error })
+    }
+    finally {
+      this.setState({ isLoading: false })
     };
-
+  }
+  
     handleSearch = query => {
       if (query === this.state.query) return;
       this.setState({
@@ -121,7 +83,7 @@ export class App extends Component {
       }));
     };
 
-    toggleModal = largeImageURL => {
+    toggleModal = (largeImageURL) => {
       this.setState(({ showModal }) => ({
         showModal: !showModal,
       }));

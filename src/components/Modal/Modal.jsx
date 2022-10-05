@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import { Overlay, ModalStyled } from './ModalStyled';
 
-const modalRoot = document.querySelector('#modal-root');
+const modalRoot = document.getElementById('modal-root');
 
 export class Modal extends Component {
   static propTypes = {
@@ -12,32 +12,25 @@ export class Modal extends Component {
     onClose: PropTypes.func,
     children: PropTypes.node.isRequired,
   };
-
+//вешаем слушателя на keydown
   componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keydown', this.closeModal);
   }
-
+//отпишемся от слушателя
   componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keydown', this.closeModal);
   }
-
-  handleKeyDown = e => {
-    if (e.code === 'Escape') {
-      this.props.onClose();
+//закрываем модалку при клике на Overlay или клавишу Escape
+  closeModal = ({ currentTarget, target, code }) => {
+        if (currentTarget === target || code === 'Escape') {
+          this.props.onClose(); 
+       }  
     }
-  };
-
-  handleBackdropClick = e => {
-    if (e.currentTarget === e.target) {
-      this.props.onClose();
-    }
-  };
 
   render() {
     return createPortal(
-      <Overlay onClick={this.handleBackdropClick}>
-        <ModalStyled>{this.props.children}</ModalStyled>
-       
+      <Overlay onClick={this.closeModal}>
+        <ModalStyled>{this.props.children}</ModalStyled>       
       </Overlay>,
       modalRoot
     );
